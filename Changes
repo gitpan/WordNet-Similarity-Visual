@@ -1,0 +1,6 @@
+Revision history for Perl extension WordNet::Similarity::Visual.
+
+0.01  Wed Jun 22 14:55:19 2005
+	- original version; created by h2xs 1.23 with options
+		-X -n WordNet::Similarity::Visual
+

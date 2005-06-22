@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/WordNet-Similarity-Visual.t
+lib/WordNet/Similarity/Visual.pm
