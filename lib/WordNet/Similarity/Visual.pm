@@ -13,7 +13,7 @@ my $main_window;
 my $querydata_vbox;
 my $similarity_vbox;
 our $main_statusbar;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 sub new
@@ -27,6 +27,7 @@ sub new
 sub initialize
 {
   my ($self)=@_;
+  $self->configure;
   $self->{ main_window } = WordNet::Similarity::Visual::GUI_Window->new;
   $self->{ main_window }->initialize("WordNet::Similarity GUI",0, 645,500);
     $self->{ main_statusbar } = Gtk2::Statusbar->new;
@@ -51,10 +52,30 @@ sub initialize
   $self->{ main_window }->display;
 }
 
+# This function writes the initial configuration files for the various measures.
+sub configure
+{
+  if (!chdir($ENV{ HOME } . "/.wordnet-similarity"))
+  {
+    mkdir ($ENV{ HOME } . "/.wordnet-similarity");
+    open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-path.conf";
+    print CONFIG "WordNet::Similarity::path\ntrace::1\ncache::1\nmaxCacheSize::5000\nrootNode::1";
+    close CONFIG;
+    open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-wup.conf";
+    print CONFIG "WordNet::Similarity::wup\ntrace::1\ncache::1\nmaxCacheSize::5000\nrootNode::1";
+    close CONFIG;
+    open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-hso.conf";
+    print CONFIG "WordNet::Similarity::hso\ntrace::1\ncache::1\nmaxCacheSize::5000";
+    close CONFIG;
+    open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-lch.conf";
+    print CONFIG "WordNet::Similarity::lch\ntrace::1\ncache::1\nmaxCacheSize::5000\nrootNode::1";
+    close CONFIG;
+  }
+}
 
 sub update_ui
 {
-  my ($self) = @_; 
+  my ($self) = @_;
   $self->{ main_window }->update_ui();
 }
 
@@ -75,14 +96,32 @@ WordNet::Similarity::Visual - Perl extension for providing visualizatio tools fo
 =head1 SYNOPSIS
 
   use WordNet::Similarity::Visual;
-  
+
   This module provides a graphical user interface for WordNet::Similarity and visualization tools for the path based measures built in
   WordNet::Similarity. These visualization tools will make it easier for the user to understand the concepts behind these semantic measures.
 
 =head1 DESCRIPTION
-  
+
   This module provides a graphical user interface for WordNet::Similarity and visualization tools for the path based measures built in
   WordNet::Similarity. These visualization tools will make it easier for the user to understand the concepts behind these semantic measures.
+
+=head2 Methods
+
+The following methods are defined in this package:
+
+=head3 Public methods
+
+=over
+
+=item $obj->new
+
+The constructor for WordNet::Similarity::Visual objects.
+
+Return value: the new blessed object
+
+=item $obj->initialize
+
+To initialize the Graphical User Interface and pass the control to it.
 
 
 =head1 SEE ALSO

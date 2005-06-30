@@ -92,7 +92,7 @@ sub search_senses
   {
     my $querydata = new WordNet::QueryData;
     $word=lc $word;
-	  my @temp = split '#',$word;
+    my @temp = split '#',$word;
     my $wordlevel = $#temp+1;
     my @allsenses = ();
     my $sense;
@@ -114,7 +114,7 @@ sub search_senses
           @wordglos = $querydata->querySense($wordsense,"glos");
           $allres{$wordsense}=$wordglos[0];
           $count++;
-        }    
+        }
     }
     else
     {
@@ -142,7 +142,7 @@ sub search_senses
     }
     else
     {
-      #$main_window->message("destroy-with-parent","error", "ok", "Word not found in WordNet");      
+      #$main_window->message("destroy-with-parent","error", "ok", "Word not found in WordNet");
     }
   }
   else
@@ -160,11 +160,11 @@ Provides the basic GUI for WordNet::QueryData
 =head1 SYNOPSIS
 
   use WordNet::Similarity::Visual;
-  
+
   This module provides a graphical user interface for WordNet::QueryData
-  
+
 =head1 DESCRIPTION
-  
+
   This module provides a basic graphical user interface for WordNet::QueryData
 
 
