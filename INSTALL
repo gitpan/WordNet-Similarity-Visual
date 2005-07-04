@@ -1,5 +1,5 @@
 NAME
-    install.pod - how to install WordNet::Similarity
+    INSTALL - how to install WordNet::Similarity::Visual
 
 SYNOPSIS
      perl Makefile.PL

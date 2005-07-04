@@ -2,5 +2,9 @@ Changes
 Makefile.PL
 MANIFEST
 README
+INSTALL
 t/WordNet-Similarity-Visual.t
 lib/WordNet/Similarity/Visual.pm
+lib/WordNet/Similarity/Visual/GUI_Window.pm
+lib/WordNet/Similarity/Visual/SimilarityInterface.pm
+lib/WordNet/Similarity/Visual/QueryDataInterface.pm

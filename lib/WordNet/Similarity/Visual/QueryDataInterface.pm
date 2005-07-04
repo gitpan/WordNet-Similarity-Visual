@@ -1,21 +1,68 @@
 package WordNet::Similarity::Visual::QueryDataInterface;
 
+=head1 NAME
+
+WordNet::Similarity::Visual::QueryDataInterface
+
+=head1 SYNOPSIS
+
+=head2 Basic Usage Example
+
+  use WordNet::Similarity::Visual::QueryDataInterface;
+
+  my $wn = WordNet::Similarity::Visual::QueryDataInterface->new;
+
+  $wn->initialize;
+
+  my ($result) = $wn->find_allsenses($word);
+
+=head1 DESCRIPTION
+
+This package provides an interface to WordNet::QueryData.
+
+=head2 Methods
+
+The following methods are defined in this package:
+
+=head3 Public methods
+
+=over
+
+=cut
+
 use 5.008004;
 use strict;
 use warnings;
 use Gtk2 '-init';
 use WordNet::QueryData;
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 use constant TRUE  => 1;
 use constant FALSE => 0;
 my $vbox;
 my $result_box;
+
+=item  $obj->new
+
+The constructor for WordNet::Similarity::Visual::QueryDataInterface objects.
+
+Return value: the new blessed object
+
+=cut
+
 sub new
 {
   my ($class) = @_;
   my $self = {};
   bless $self, $class;
 }
+
+=item  $obj->initialize
+
+To initialize WordNet::QueryData.
+
+Return Value: None
+
+=cut
 
 sub initialize
 {
@@ -82,6 +129,15 @@ sub display_querydata_results
   $gui->{ querydata_vbox }->{result_box}->show_all;
   $gui->update_ui;
 }
+
+
+=item  $obj->search_glosses
+
+Parameter: The word(String) for which we are searching the glosses.
+
+Return value: A hash with all the glosses for all the senses of the word.
+
+=cut
 
 sub search_senses
 {
@@ -153,41 +209,38 @@ sub search_senses
 
 1;
 __END__
-=head1 NAME
 
-Provides the basic GUI for WordNet::QueryData
+=item  $obj->find_allsenses
 
-=head1 SYNOPSIS
+Parameter: The word(String) for which we are searching the senses.
 
-  use WordNet::Similarity::Visual;
+Return value: A array of all the senses of this word found in WordNet.
 
-  This module provides a graphical user interface for WordNet::QueryData
+=back
 
-=head1 DESCRIPTION
+=head2 Discussion
 
-  This module provides a basic graphical user interface for WordNet::QueryData
-
+This module provides an interface to WordNet::Querydata. It implements functions
+that take a word as argument and return all the senses of this word listed in
+WordNet. It also implements a function that returns a hash containing all the
+senses of  the word and the glosses for these senses.
 
 =head1 SEE ALSO
 
-Gtk2
-Gnome2
 WordNet::QueryData
 
 =head1 AUTHOR
-
-Saiyam Kohli, E<lt>kohli003@d.umn.eduE<gt>
-
-Ted Pedersen, University of Minnesota, Duluth
-tpederse@d.umn.edu
-
-Copyright (c) 2005-2006
 
 Saiyam Kohli, University of Minnesota, Duluth
 kohli003@d.umn.edu
 
 Ted Pedersen, University of Minnesota, Duluth
 tpederse@d.umn.edu
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2005-2006, Saiyam Kohli and Ted Pedersen
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -196,15 +249,18 @@ any later version.
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to
 
-The Free Software Foundation, Inc.,
-59 Temple Place - Suite 330,
-Boston, MA  02111-1307, USA.
+    The Free Software Foundation, Inc.,
+    59 Temple Place - Suite 330,
+    Boston, MA  02111-1307, USA.
 
+Note: a copy of the GNU General Public License is available on the web
+at <http://www.gnu.org/licenses/gpl.txt> and is included in this
+distribution as GPL.txt.
 
 =cut

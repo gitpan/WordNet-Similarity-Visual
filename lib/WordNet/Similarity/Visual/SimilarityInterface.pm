@@ -1,9 +1,40 @@
 package WordNet::Similarity::Visual::SimilarityInterface;
 
+=head1 NAME
+
+WordNet::Similarity::Visual::SimilarityInterface
+
+=head1 SYNOPSIS
+
+=head2 Basic Usage Example
+
+  use WordNet::Similarity::Visual::SimilarityInterface;
+
+  my $similarity = WordNet::Similarity::Visual::SimilarityInterface->new;
+
+  $similarity->initialize;
+
+  my ($result,$errors,$traces) = $similarity->compute_similarity($word1,$word2,$measure_index);
+
+=head1 DESCRIPTION
+
+This package provides an interface to WordNet::Similarity. It also converts the
+trace string to the meta-language.
+
+=head2 Methods
+
+The following methods are defined in this package:
+
+=head3 Public methods
+
+=over
+
+=cut
+
 use 5.008004;
 use strict;
 use warnings;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use Gtk2 '-init';
 use WordNet::QueryData;
 use WordNet::Similarity;
@@ -25,6 +56,13 @@ my $values_result_box;
 my $STOPPED;
 use constant CONFIG => $ENV{ HOME }."/.wordnet-similarity";
 
+=item  $obj->new
+
+The constructor for WordNet::Similarity::Visual::SimilarityInterface objects.
+
+Return value: the new blessed object
+
+=cut
 
 sub new
 {
@@ -32,6 +70,14 @@ sub new
   my $self = {};
   bless $self, $class;
 }
+
+=item  $obj->initialize
+
+To initialize WordNet::Similarity.
+
+Return Value: None
+
+=cut
 
 sub initialize
 {
@@ -95,6 +141,38 @@ sub initialize
   $self->{ vbox }->pack_start($hpaned, TRUE, TRUE, 0);
 
 }
+
+
+=item  $obj->compute_similarity
+
+Computes the similarity and relatedness scores for two words.
+
+Parameter: Two Words and the Measure Index
+"hso","lch","lesk","lin","jcn","path","random","res","vector_pairs","wup"
+The measure index can have any of the following values
+  - 0 for "all measures"
+  - 1 for "Hirst & St-Onge"
+  - 2 for "Leacock and Chodorow"
+  - 3 for "Adapted Lesk"
+  - 4 for "Lin"
+  - 5 for "Jiang & Conrath"
+  - 6 for "Path Length"
+  - 7 for "Random"
+  - 8 for "Resnik"
+  - 9 for "Vector Pair"
+  - 10 for "Wu and Palmer"
+
+Returns: Reference to Hashes containining
+
+  - semantic relatedness/similarity values for all the word senses combination and measures,
+  - errorStrings for the word senses and measure which did not return a similarity value
+  - TraceString for all the measures that had trace output on
+
+=over
+
+=back
+
+=cut
 
 sub compute_similarity
 {
@@ -206,6 +284,7 @@ sub compute_similarity
   return (\%values, \%errors,\%traces);
 }
 
+
 sub display_similarity_results
 {
   my ($gui, $values, $errors, $traces, $measure_index) = @_;
@@ -284,6 +363,8 @@ sub display_similarity_results
   $gui->update_ui;
 }
 
+
+
 sub trace_results
 {
   my ($self,$word1,$word2,$measure,$traces)=@_;
@@ -312,15 +393,6 @@ sub trace_results
   $self->{ trace_result_box }->pack_start($txtview, TRUE, TRUE, 0);
   $self->{ trace_result_box }->show_all;
 }
-
-
-
-
-
-
-
-
-
 
 
 sub find_allsenses
@@ -353,6 +425,20 @@ sub find_allsenses
   }
   return @wordsenses;
 }
+
+
+=item  $obj->convert_to_meta
+
+Converts the Trace String to Meta-language.
+
+Parameter: The two Word senses, Trace String and the Measure name
+
+Returns: A String, the equivalent metalanguage for the trace string.
+
+=over
+
+=cut
+
 
 sub convert_to_meta
 {
@@ -523,39 +609,59 @@ sub convert_to_meta
 1;
 __END__
 
-=head1 NAME
 
-Provides the basic GUI for WordNet::Similarity
+=back
 
-=head1 SYNOPSIS
+=back
 
-  This module provides a graphical user interface for WordNet::Similarity
+=head2 Discussion
 
-=head1 DESCRIPTION
+This module provides an interface to the various WordNet::Similarity measures.
+It implements functions that take as argument two words then find the similarity
+scores scores for all the senses of these words. This module also implements the
+funtion that takes as input a tracestring and converts it to the meta-language.
 
-  This module provides a basic graphical user interface for WordNet::Similarity
+=head3 Meta-language
+
+The first line in the meta language is the measure name. The next two line list
+all the possible shortest paths between the two concepts. The synsets represent
+the nodes along these paths, thile the relation names between these synsets
+represent the edges. If there is more than one shortest path they are also
+listed. The alternate shortest paths are seperated using the OR operator. The
+rest of the lines list all the other paths in the hypernym tree. These alternate
+hypernym trees also use the same system as used in the shortest path. The next
+line is the maximum depth of the hypertree
+
+    path
+    cat#n#1 is-a feline#n#1 is-a carnivore#n#1
+    dog#n#1 is-a canine#n#2 is-a carnivore#n#1
+    carnivore#n#1 is-a placental#n#1 is-a mammal#n#1 is-a vertebrate#n#1 is-a
+      chordate#n#1 is-a animal#n#1 is-a organism#n#1 is-a living_thing#n#1 is-a
+      object#n#1 is-a entity#n#1 is-a Root#n#1
+    Max Depth = 13
+    Path length = 5
 
 
 =head1 SEE ALSO
 
-Gtk2
-Gnome2
+WordNet::Similarity
 WordNet::QueryData
 
+Mailing List: E<lt>wn-similarity@yahoogroups.comE<gt>
+
+
 =head1 AUTHOR
-
-Saiyam Kohli, E<lt>kohli003@d.umn.eduE<gt>
-
-Ted Pedersen, University of Minnesota, Duluth
-tpederse@d.umn.edu
-
-Copyright (c) 2005-2006
 
 Saiyam Kohli, University of Minnesota, Duluth
 kohli003@d.umn.edu
 
 Ted Pedersen, University of Minnesota, Duluth
 tpederse@d.umn.edu
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2005-2006, Saiyam Kohli and Ted Pedersen
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -564,15 +670,18 @@ any later version.
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to
 
-The Free Software Foundation, Inc.,
-59 Temple Place - Suite 330,
-Boston, MA  02111-1307, USA.
+    The Free Software Foundation, Inc.,
+    59 Temple Place - Suite 330,
+    Boston, MA  02111-1307, USA.
 
+Note: a copy of the GNU General Public License is available on the web
+at <http://www.gnu.org/licenses/gpl.txt> and is included in this
+distribution as GPL.txt.
 
 =cut

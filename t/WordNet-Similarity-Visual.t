@@ -5,6 +5,10 @@
 
 use Test::More tests => 7;
 
+BEGIN { use_ok('WordNet::Similarity::Visual') };
+
+
+#########################
 use WordNet::QueryData;
 use WordNet::Similarity::path;
 use WordNet::Similarity::wup;
@@ -12,7 +16,6 @@ use WordNet::Similarity::hso;
 use WordNet::Similarity::lch;
 use Gtk2;
 
-BEGIN { use_ok('WordNet::Similarity::Visual') };
 $wn = WordNet::QueryData->new;
     ok( defined $wn, "QueryData Installed");
 $path = WordNet::Similarity::path->new($wn);
@@ -25,7 +28,3 @@ $lch = WordNet::Similarity::lch->new($wn);
     ok( defined $lch, "Wordnet::Similarity::lch Object succesfully created" );
 $window = Gtk2::Window->new("toplevel");
     ok( defined $window, "Gtk2 installed");
-
-
-#########################
-

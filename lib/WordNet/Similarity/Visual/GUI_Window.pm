@@ -1,14 +1,53 @@
 package WordNet::Similarity::Visual::GUI_Window;
 
+=head1 NAME
+
+WordNet::Similarity::Visual::GUI_Window
+
+=head1 SYNOPSIS
+
+=head2 Basic Usage Example
+
+  use WordNet::Similarity::Visual::GUI_Window;
+
+  my $gui = WordNet::Similarity::Visual::GUI_Window->new;
+
+  $gui->initialize;
+
+  $gui->show_all;
+
+=head1 DESCRIPTION
+
+This package implements the basic gui window to be used by
+WordNet::Similarity::Visual module.
+
+=head2 Methods
+
+The following methods are defined in this package:
+
+=head3 Public methods
+
+=over
+
+=cut
+
 use 5.008004;
 use strict;
 use warnings;
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 use Gtk2 '-init';
 use constant TRUE  => 1;
 use constant FALSE => 0;
 my $window;
 my $vbox;
+
+=item  $obj->new
+
+The constructor for WordNet::Similarity::Visual::GUI_Window objects.
+
+Return value: the new blessed object
+
+=cut
 
 sub new
 {
@@ -17,10 +56,19 @@ sub new
   bless $self, $class;
 }
 
+=item  $obj->initialize
+
+To initialize the GUI. Creates all objets of various GTK2 widgets and adds them
+to the window, to create the GUI.
+
+Return Value: None
+
+=cut
+
 sub initialize
 {
   my ($self, $title, $b_width, $width, $height) = @_;
-  
+
   $self->{ window } = Gtk2::Window->new("toplevel");
   $self->{ window }->set_title($title);
   #Create an instance of window
@@ -28,14 +76,10 @@ sub initialize
   # set the window border width
   $self->{ window }->set_default_size($width,$height);
   $self->{ window }->signal_connect(destroy => sub { Gtk2->main_quit; });
-  #$self->{ window }->
   # connect the quit signal with the window
   # quit from the GTK blocking call when the exit signal is recieved
   $self->{ vbox } = Gtk2::VBox->new(FALSE,0);
   $self->{ window }->add($self->{ vbox });
-#   $self->{ window }->signal_connect(focus=>sub { my ($self)=@_;
-#                                                       $self->show_all();
-#                                                        });
 }
 
 sub update_ui
@@ -71,11 +115,29 @@ sub message
     $message->destroy();
   }
 }
+
+=item  $obj->show_all
+
+To Display all the widgets on the screen.
+
+Return Value: None
+
+=cut
+
 sub show_all
 {
   my ($self)=@_;
   $self->{ window }->show_all;
 }
+
+=item  $obj->display
+
+Display all the measures and pass the control to GTK.
+
+Return Value: None
+
+=cut
+
 sub display
 {
   my ($self) = @_;
@@ -87,42 +149,22 @@ sub display
 1;
 __END__
 
-=head1 NAME
-
-Provides the basic GUI for WordNet::Similarity
-
-=head1 SYNOPSIS
-
-  use WordNet::Similarity::Visual;
-  
-  This module provides a graphical user interface for WordNet::Similarity and visualization tools for the path based measures built in
-  WordNet::Similarity. These visualization tools will make it easier for the user to understand the concepts behind these semantic measures.
-
-=head1 DESCRIPTION
-  
-  This module provides a graphical user interface for WordNet::Similarity and visualization tools for the path based measures built in
-  WordNet::Similarity. These visualization tools will make it easier for the user to understand the concepts behind these semantic measures.
-
-
 =head1 SEE ALSO
 
-Gtk2
-Gnome2
+GTK2
 
 =head1 AUTHOR
-
-Saiyam Kohli, E<lt>kohli003@d.umn.eduE<gt>
-
-Ted Pedersen, University of Minnesota, Duluth
-tpederse@d.umn.edu
-
-Copyright (c) 2005-2006
 
 Saiyam Kohli, University of Minnesota, Duluth
 kohli003@d.umn.edu
 
 Ted Pedersen, University of Minnesota, Duluth
 tpederse@d.umn.edu
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2005-2006, Saiyam Kohli and Ted Pedersen
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -131,14 +173,18 @@ any later version.
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to
 
-The Free Software Foundation, Inc.,
-59 Temple Place - Suite 330,
-Boston, MA  02111-1307, USA.
+    The Free Software Foundation, Inc.,
+    59 Temple Place - Suite 330,
+    Boston, MA  02111-1307, USA.
+
+Note: a copy of the GNU General Public License is available on the web
+at <http://www.gnu.org/licenses/gpl.txt> and is included in this
+distribution as GPL.txt.
 
 =cut
