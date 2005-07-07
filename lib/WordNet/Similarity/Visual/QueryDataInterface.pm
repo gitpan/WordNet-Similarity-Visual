@@ -35,7 +35,7 @@ use strict;
 use warnings;
 use Gtk2 '-init';
 use WordNet::QueryData;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use constant TRUE  => 1;
 use constant FALSE => 0;
 my $vbox;

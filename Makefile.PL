@@ -5,6 +5,7 @@ WriteMakefile(
     NAME              => 'WordNet::Similarity::Visual',
     VERSION_FROM      => 'lib/WordNet/Similarity/Visual.pm',
     PREREQ_PM         => {'Gtk2'  => '1.0',
+                          'Gnome3' => '1.0',
                           'WordNet::QueryData'  => '1.30',
                           'Text::Similarity'    => '0.02',
                           'WordNet::Similarity' => '0.14'},

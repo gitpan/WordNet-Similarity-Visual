@@ -44,7 +44,7 @@ my $main_window;
 my $querydata_vbox;
 my $similarity_vbox;
 our $main_statusbar;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =item  $obj->new
 
@@ -73,7 +73,7 @@ sub initialize
   my ($self)=@_;
   $self->configure;
   $self->{ main_window } = WordNet::Similarity::Visual::GUI_Window->new;
-  $self->{ main_window }->initialize("WordNet::Similarity GUI",0, 645,500);
+  $self->{ main_window }->initialize("WordNet::Similarity GUI",0, 800,600);
     $self->{ main_statusbar } = Gtk2::Statusbar->new;
     my $main_menu = Gtk2::MenuBar->new();
   $self->{ main_window }->pack_start($main_menu,FALSE, FALSE, 0);
