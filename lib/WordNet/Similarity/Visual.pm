@@ -44,7 +44,7 @@ my $main_window;
 my $querydata_vbox;
 my $similarity_vbox;
 our $main_statusbar;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =item  $obj->new
 
