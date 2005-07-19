@@ -35,11 +35,10 @@ use strict;
 use warnings;
 use Gtk2 '-init';
 use WordNet::QueryData;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use constant TRUE  => 1;
 use constant FALSE => 0;
-my $vbox;
-my $result_box;
+my $wn;
 
 =item  $obj->new
 
@@ -66,69 +65,11 @@ Return Value: None
 
 sub initialize
 {
-  my ($self,$gui) = @_;
-  $self->{ vbox }= Gtk2::VBox->new(FALSE, 6);
-  $self->{ vbox }->set_border_width(6);
-  my $entry_align = Gtk2::Alignment->new(0.0,0.0,0.3,0.0);
-    my $entry_hbox = Gtk2::HBox->new(FALSE,6);
-      my $back_button = Gtk2::Button->new('<< _Back');
-      my $forward_button = Gtk2::Button->new('_Forward >>');
-      my $searchword_entry = Gtk2::Entry->new;
-      my $search_button = Gtk2::Button->new('_Search');
-      my $print_button = Gtk2::Button->new('_Print');
-      $entry_hbox->pack_start($back_button,FALSE, FALSE, 0);
-      $entry_hbox->pack_start($forward_button,FALSE, FALSE, 0);
-      $entry_hbox->pack_start($searchword_entry, TRUE, TRUE, 0);
-      $entry_hbox->pack_start($search_button,FALSE, FALSE, 0);
-      $entry_hbox->pack_start($print_button,FALSE, FALSE, 0);
-      $search_button->signal_connect(clicked=>sub {
-                                                    my ($self, $gui)=@_;
-                                                    $gui->set_statusmessage("QueryData", "Crawling Through WordNet for Senses!");
-                                                    my $word = $searchword_entry->get_text();
-                                                    my $result=search_senses($word);
-                                                    display_querydata_results($gui,$result);
-                                                   }, $gui);
-    $entry_align->add($entry_hbox);
-  $self->{ vbox }->pack_start($entry_align, FALSE, FALSE, 0);
-    my $hseparator = Gtk2::HSeparator->new;
-  $self->{ vbox }->pack_start($hseparator, FALSE, FALSE, 0);
-  $self->{ result_box }=Gtk2::VBox->new(FALSE,4);
-  $self->{ vbox }->pack_start($self->{ result_box }, TRUE, TRUE, 0);
+  my ($self) = @_;
+  $self->{ wn }=WordNet::QueryData->new;
 }
 
 
-sub display_querydata_results
-{
-  my ($gui, $result)=@_;
-  my $wps;
-  my %labels;
-  my %hbox;
-  my %txtview;
-  my %txtbuffer;
-  my $children;
-  my @prev_results = $gui->{ querydata_vbox }->{ result_box }->get_children();
-  foreach $children (@prev_results)
-  {
-    $gui->{ querydata_vbox }->{result_box}->remove($children);
-  }
-  foreach $wps (sort keys %$result)
-  {
-    $labels{$wps}=Gtk2::Label->new($wps);
-    $hbox{$wps}=Gtk2::HBox->new();
-    $txtbuffer{$wps}=Gtk2::TextBuffer->new();
-    $txtbuffer{$wps}->set_text($result->{$wps});
-    $txtview{$wps}=Gtk2::TextView->new;
-    $txtview{$wps}->set_editable(FALSE);
-    $txtview{$wps}->set_cursor_visible(FALSE);
-    $txtview{$wps}->set_wrap_mode("word");
-    $txtview{$wps}->set_buffer($txtbuffer{$wps});
-    $hbox{$wps}->pack_start($labels{$wps},FALSE,FALSE,0);
-    $hbox{$wps}->pack_start($txtview{$wps},TRUE, TRUE, 0);
-    $gui->{ querydata_vbox }->{result_box}->pack_start($hbox{$wps},FALSE, FALSE, 4);
-  }
-  $gui->{ querydata_vbox }->{result_box}->show_all;
-  $gui->update_ui;
-}
 
 
 =item  $obj->search_glosses
@@ -141,12 +82,11 @@ Return value: A hash with all the glosses for all the senses of the word.
 
 sub search_senses
 {
-  my ($word) = @_;
+  my ($self, $word) = @_;
   my $count=0;
   my @wordglos=();
   if (length $word != 0 )
   {
-    my $querydata = new WordNet::QueryData;
     $word=lc $word;
     my @temp = split '#',$word;
     my $wordlevel = $#temp+1;
@@ -155,19 +95,23 @@ sub search_senses
     my %allres;
     if ($wordlevel == 3)
     {
-      @wordglos = $querydata->querySense($word, "glos");
+      @wordglos = $self->{ wn }->querySense($word, "glos");
       $allres{$word} = $wordglos[0];
       $count++;
     }
     elsif ($wordlevel == 2)
     {
-        my @senses = $querydata->queryWord($word);
+        my @senses = $self->{ wn }->queryWord($word);
         my @wordglos;
         my $glos;
         my $wordsense;
         foreach $wordsense (@senses)
         {
-          @wordglos = $querydata->querySense($wordsense,"glos");
+          while (Gtk2->events_pending)
+          {
+            Gtk2->main_iteration;
+          }
+          @wordglos = $self->{ wn }->querySense($wordsense,"glos");
           $allres{$wordsense}=$wordglos[0];
           $count++;
         }
@@ -175,7 +119,7 @@ sub search_senses
     else
     {
       my @wordpos= ();
-      @wordpos=$querydata->queryWord($word);
+      @wordpos=$self->{ wn }->queryWord($word);
       my $pos;
       my $wordsense;
       my @senses = ();
@@ -183,10 +127,18 @@ sub search_senses
       my @wordglos;
       foreach $pos (@wordpos)
       {
-        @senses = $querydata->queryWord($pos);
+        while (Gtk2->events_pending)
+        {
+          Gtk2->main_iteration;
+        }
+        @senses = $self->{ wn }->queryWord($pos);
         foreach $wordsense (@senses)
         {
-          @wordglos = $querydata->querySense($wordsense,"glos");
+          while (Gtk2->events_pending)
+          {
+            Gtk2->main_iteration;
+          }
+          @wordglos = $self->{ wn }->querySense($wordsense,"glos");
           $allres{$wordsense}=$wordglos[0];
           $count++;
         }
@@ -198,17 +150,10 @@ sub search_senses
     }
     else
     {
-      #$main_window->message("destroy-with-parent","error", "ok", "Word not found in WordNet");
+      return -1;
     }
   }
-  else
-  {
-    #$main_window->message("destroy-with-parent","info", "ok", "Please enter the word you want to search!");
-  }
 }
-
-1;
-__END__
 
 =item  $obj->find_allsenses
 
@@ -216,9 +161,60 @@ Parameter: The word(String) for which we are searching the senses.
 
 Return value: A array of all the senses of this word found in WordNet.
 
-=back
+=cut
+
+sub find_allsenses
+{
+  my ($self, $word)=@_;
+  my @temp = split '#',$word;
+  my $wordlevel = $#temp+1;
+  my $pos;
+  my @wordsenses = ();
+  my @wordsense;
+  if($wordlevel==1)
+  {
+    @temp=$self->{ wn }->queryWord($word);
+    foreach $pos (@temp)
+    {
+      @wordsense=$self->{ wn }->queryWord($pos);
+      push (@wordsenses, @wordsense);
+      @wordsense = ();
+    }
+  }
+  elsif($wordlevel==2)
+  {
+    @wordsenses = $self->{ wn }->queryWord($word);
+  }
+  else
+  {
+    $wordsenses[0]=$word
+  }
+  return @wordsenses;
+}
+
+
+
+=item  $obj->find_allsyns
+
+Parameter: The word(String) for which we are searching the synonyms.
+
+Return value: A array of all the senses of this word found in WordNet.
+
+=cut
+
+sub find_allsyns
+{
+  my ($self, $word)=@_;
+  my @syns1 = $self->{ wn }->querySense($word,"syns");
+  return @syns1;
+}
+
+1;
+__END__
 
 =head2 Discussion
+
+=back
 
 This module provides an interface to WordNet::Querydata. It implements functions
 that take a word as argument and return all the senses of this word listed in
