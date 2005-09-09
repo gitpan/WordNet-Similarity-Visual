@@ -1,4 +1,4 @@
-WordNet-Similarity-Visual version 0.06
+WordNet-Similarity-Visual version 0.07
 ======================================
 
 This module provides a graphical user interface for
@@ -27,6 +27,11 @@ To install this module type the following:
    make
    make test
    make install
+
+RUN
+===
+
+Run wordnet_similarity.pl included in the installation directory.
 
 DEPENDENCIES
 ============

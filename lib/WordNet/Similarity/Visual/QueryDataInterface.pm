@@ -35,7 +35,7 @@ use strict;
 use warnings;
 use Gtk2 '-init';
 use WordNet::QueryData;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use constant TRUE  => 1;
 use constant FALSE => 0;
 my $wn;

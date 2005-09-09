@@ -56,7 +56,8 @@ my $toolflag;
 my $tooltip_label;
 my $vpaned;
 my $main_statusbar;
-our $VERSION = '0.06';
+my $canvas;
+our $VERSION = '0.07';
 
 =item  $obj->new
 
@@ -126,7 +127,9 @@ sub initialize
                                                         });
   $self->{ start_window }->show_all;
   Gtk2->main;
+
 ###########################################################################################
+
   $self->{ main_window } = WordNet::Similarity::Visual::GUI_Window->new;
   $self->{ main_window }->initialize("WordNet::Similarity GUI",0, 800,600);
     $self->{ main_statusbar } = Gtk2::Statusbar->new;
@@ -136,6 +139,7 @@ sub initialize
     $tabbedwindow->set_show_border(0);
       my $querydata_scrollwindow = Gtk2::ScrolledWindow->new;
       my $similarity_scrollwindow = Gtk2::ScrolledWindow->new;
+
 ###########################################################################################
 
   $self->{ similarity_vbox } =  Gtk2::VBox->new(FALSE, 6);
@@ -159,6 +163,7 @@ sub initialize
           $measure_touse->set_active(0);
         my $compute_button = Gtk2::Button->new('_Compute');
         my $stop_button = Gtk2::Button->new('_Stop');
+#         my $save_button = Gtk2::Button->new('_Save');
       $similarity_entry_hbox->pack_start($word1_similarity_entry, TRUE, TRUE, 0);
       $similarity_entry_hbox->pack_start($word2_similarity_entry, TRUE, TRUE, 0);
       $similarity_entry_hbox->pack_start($measure_touse, TRUE, TRUE, 0);
@@ -178,6 +183,32 @@ sub initialize
                                                     $gui->{ similarity_interface }->{ STOPPED }=1;
                                                     }, $self);
       $similarity_entry_hbox->pack_start($stop_button,FALSE, FALSE, 0);
+# ############################################################################################
+# # ##Change
+#         $save_button->signal_connect(clicked=>sub {
+#                                                     my ($self,$gui)=@_;
+#                                                     my $file_selector = Gtk2::FileSelection->new("Save File as...");
+#                                                     $file_selector->set_select_multiple(FALSE);
+#                                                     $file_selector->ok_button->set_label("Save");
+#                                                     my @data = ($file_selector, $gui);
+#                                                     $file_selector->ok_button->signal_connect(clicked=>sub {
+#                                                                       my ($self,$data)=@_;
+#                                                                       my $file_selector = $data->[0];
+#                                                                       my $gui = $data->[1];
+#                                                                       my $file_name=$file_selector->get_filename();
+#                                                                       print $file_name;
+#                                                                       $gui->save_file($file_name);
+#                                                                       $file_selector->destroy;
+#                                                                     },\@data);
+#                                                     $file_selector->ok_button->signal_connect(clicked=>sub {
+#                                                                                   my ($self,$file_selector)=@_;
+#                                                                                   $file_selector->destroy;
+#                                                                                 },$file_selector);
+#
+#                                                     $file_selector->show_all;
+#                                                     }, $self);
+# ###########################################################################################
+#       $similarity_entry_hbox->pack_start($save_button,FALSE, FALSE, 0);
     $similarity_entry_align->add($similarity_entry_hbox);
   $self->{ similarity_vbox }->pack_start($similarity_entry_align, FALSE, FALSE, 0);
     my $hseparator = Gtk2::HSeparator->new;
@@ -204,13 +235,13 @@ sub initialize
   $self->{ querydata_vbox }->set_border_width(6);
   my $querydata_entry_align = Gtk2::Alignment->new(0.0,0.0,0.3,0.0);
     my $querydata_entry_hbox = Gtk2::HBox->new(FALSE,6);
-      my $back_button = Gtk2::Button->new('<< _Back');
-      my $forward_button = Gtk2::Button->new('_Forward >>');
+#       my $back_button = Gtk2::Button->new('<< _Back');
+#       my $forward_button = Gtk2::Button->new('_Forward >>');
       my $searchword_entry = Gtk2::Entry->new;
       my $querydata_search_button = Gtk2::Button->new('_Search');
       my $print_button = Gtk2::Button->new('_Print');
-      $querydata_entry_hbox->pack_start($back_button,FALSE, FALSE, 0);
-      $querydata_entry_hbox->pack_start($forward_button,FALSE, FALSE, 0);
+#       $querydata_entry_hbox->pack_start($back_button,FALSE, FALSE, 0);
+#       $querydata_entry_hbox->pack_start($forward_button,FALSE, FALSE, 0);
       $querydata_entry_hbox->pack_start($searchword_entry, TRUE, TRUE, 0);
       $querydata_entry_hbox->pack_start($querydata_search_button,FALSE, FALSE, 0);
       $querydata_entry_hbox->pack_start($print_button,FALSE, FALSE, 0);
@@ -240,6 +271,7 @@ sub initialize
   $self->{ main_window }->pack_start($tabbedwindow,TRUE, TRUE,0);
   $self->{ main_window }->pack_end($self->{ main_statusbar },FALSE, FALSE, 0);
   $self->{ main_window }->display;
+
 ###############################################################################################3
 }
 
@@ -327,16 +359,16 @@ sub configure
   {
     mkdir ($ENV{ HOME } . "/.wordnet-similarity");
     open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-path.conf";
-    print CONFIG "WordNet::Similarity::path\ntrace::1\ncache::1\nmaxCacheSize::5000\nrootNode::1";
+    print CONFIG "WordNet::Similarity::path\ntrace::1\ncache::0\nmaxCacheSize::5000\nrootNode::1";
     close CONFIG;
     open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-wup.conf";
-    print CONFIG "WordNet::Similarity::wup\ntrace::1\ncache::1\nmaxCacheSize::5000\nrootNode::1";
+    print CONFIG "WordNet::Similarity::wup\ntrace::1\ncache::0\nmaxCacheSize::5000\nrootNode::1";
     close CONFIG;
     open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-hso.conf";
-    print CONFIG "WordNet::Similarity::hso\ntrace::1\ncache::1\nmaxCacheSize::5000";
+    print CONFIG "WordNet::Similarity::hso\ntrace::1\ncache::0\nmaxCacheSize::5000";
     close CONFIG;
     open CONFIG, "+>".$ENV{ HOME } . "/.wordnet-similarity/config-lch.conf";
-    print CONFIG "WordNet::Similarity::lch\ntrace::1\ncache::1\nmaxCacheSize::5000\nrootNode::1";
+    print CONFIG "WordNet::Similarity::lch\ntrace::1\ncache::0\nmaxCacheSize::5000\nrootNode::1";
     close CONFIG;
   }
 }
@@ -347,6 +379,7 @@ sub update_ui
   my ($self) = @_;
   $self->{ main_window }->update_ui();
 }
+
 
 sub set_statusmessage
 {
@@ -432,7 +465,6 @@ sub display_similarity_results
                                                 $gui->trace_results($word1,$word2,$measure,$traces);
                                                 $gui->update_ui;
                                              }, $self);
-
             $button->set_relief("none");
             $self->{ values_result_box }->pack_start($button,FALSE, FALSE, 4);
           }
@@ -443,6 +475,7 @@ sub display_similarity_results
   $self->{ values_result_box }->show_all;
   $self->update_ui;
 }
+
 
 sub trace_results
 {
@@ -471,6 +504,33 @@ sub trace_results
     $meta = $self->{ similarity_interface }->convert_to_meta($word1,$word2,$traces->{$word1}{$word2}{$measure},$measure);
     my $canvas = $self->display_tree($meta,450,450);
     $self->{ trace_result_box }->pack_start($canvas, TRUE, TRUE, 0);
+  }
+  elsif($measure=~/hso/)
+  {
+    if($traces->{$word1}{$word2}{$measure}=~/MedStrong\srelation\spath\.\.\./)
+    {
+      $meta = $self->{ similarity_interface }->convert_to_meta($word1,$word2,$traces->{$word1}{$word2}{$measure},$measure);
+      my $canvas = $self->display_tree($meta,450,450);
+      $self->{ trace_result_box }->pack_start($canvas, TRUE, TRUE, 0);
+    }
+    elsif($traces->{$word1}{$word2}{$measure}=~/Strong\sRel\s\(Synset\sMatch\)/)
+    {
+      $meta = $self->{ similarity_interface }->convert_to_meta($word1,$word2,$traces->{$word1}{$word2}{$measure},$measure);
+      my $canvas = $self->display_tree($meta,450,450);
+      $self->{ trace_result_box }->pack_start($canvas, TRUE, TRUE, 0);
+    }
+    else
+    {
+      $meta = $traces->{$word1}{$word2}{$measure}."\nNo strong relation path found!!";
+      my $txtbuffer = Gtk2::TextBuffer->new();
+      $txtbuffer->set_text($meta);
+      my $txtview = Gtk2::TextView->new;
+      $txtview->set_editable(FALSE);
+      $txtview->set_cursor_visible(FALSE);
+      $txtview->set_wrap_mode("word");
+      $txtview->set_buffer($txtbuffer);
+      $self->{ trace_result_box }->pack_start($txtview, TRUE, TRUE, 0);
+    }
   }
   else
   {
@@ -524,8 +584,12 @@ sub display_tree
   my $wps1_path;
   my $wps2_path;
   my $notebook;
+  my $color;
   my $k=0;
+  my @colorpos;
   my @canvas;
+  my $lcs_x;
+  my $lcs_y;
   my @canvas_root;
   my @shortest_path_group;
   my @root_group;
@@ -538,6 +602,13 @@ sub display_tree
     if($#mult_wps1_path+$#mult_wps2_path+1>1)
     {
       $notebook = Gtk2::Notebook->new;
+#       $notebook->signal_connect(switch_page=>sub {
+#                                                     my ($self,$gui) = @_;
+#                                                     my $child=$self->get_current_page;
+#                                                     print $child;
+#                                                     my @children = $self->get_children;
+#                                                     $gui->{ canvas }= $children[$child];
+#                                 },$self);
       $mpflag = 1;
     }
     else
@@ -565,9 +636,9 @@ sub display_tree
         $minx=0;
         $miny=0;
         @roots = grep /Root\b/, @trace_strings;
-        if($roots[0] =~ /$trace_strings[1]/ or $roots[0] =~ /$trace_strings[1]/)
+        if(length($roots[0]) == length($trace_strings[1]) or length($roots[0]) == length($trace_strings[2]))
         {
-          @wps= split /\sis-a\s/, $roots[0];
+          @wps= split /\shypernym\s/, $roots[0];
           $word = $wps[$#wps];
           $y = $y-$diffy;
           if($miny>$y)
@@ -588,12 +659,27 @@ sub display_tree
           }
           $wpspos{$word}{"x"}=$x;
           $wpspos{$word}{"y"}=$y;
+          $lcs_x=$x;
+          $lcs_y=$y;
+          @colorpos = split '#', $word;
+          if($colorpos[1]=~ 'v')
+          {
+            $color = 'red';
+          }
+          elsif($colorpos[1]=~ 'n')
+          {
+            $color = 'dark green';
+          }
+          else
+          {
+            $color = 'purple';
+          }
           $text{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Text",
                                             x => $x,
                                             y => $y,
-                                            fill_color => 'black',
                                             font => 'Sans 10',
                                             anchor => 'GTK_ANCHOR_CENTER',
+                                            fill_color => $color,
                                             text => $word);
           if($word !~ /Root/)
           {
@@ -606,7 +692,7 @@ sub display_tree
         else
         {
           $jflag=0;
-          @wps= split /\sis-a\s/, $roots[0];
+          @wps= split /\shypernym\s/, $roots[0];
           foreach $j (0...$#wps)
           {
             $word = $wps[$j];
@@ -627,14 +713,32 @@ sub display_tree
             {
               $maxx = $x;
             }
+            if($j==0)
+            {
+              $lcs_x=$x;
+              $lcs_y=$y;
+            }
             $wpspos{$word}{"x"}=$x;
             $wpspos{$word}{"y"}=$y;
+            @colorpos = split '#', $word;
+            if($colorpos[1]=~ 'v')
+            {
+              $color = 'red';
+            }
+            elsif($colorpos[1]=~ 'n')
+            {
+              $color = 'dark green';
+            }
+            else
+            {
+              $color = 'purple';
+            }
             $text{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Text",
                                               x => $x,
                                               y => $y,
-                                              fill_color => 'black',
                                               font => 'Sans 10',
                                               anchor => 'GTK_ANCHOR_CENTER',
+                                              fill_color => $color,
                                               text => $word);
             if($word !~ /Root/)
             {
@@ -645,23 +749,42 @@ sub display_tree
             }
             if($j>0)
             {
-              $line{$wps[$j-1]}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
-                                                                    points => [$prevx,$prevy-$diffy/5,$x,$y+$diffy/5],
-                                                                    width_pixels => 1,
-                                                                    last_arrowhead => 1,
-                                                                    arrow_shape_a => 3.57,
-                                                                    arrow_shape_b => 6.93,
-                                                                    arrow_shape_c => 4,
-                                                                    fill_color => 'blue',
-                                                                    line_style => 'on-off-dash'
-                                                                    );
+              if($roots[0] =~ /$trace_strings[1]/ or $roots[0] =~ /$trace_strings[2]/)
+              {
+                $line{$wps[$j-1]}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
+                                                                      points => [$prevx,$prevy-$diffy/5,$x,$y+$diffy/5],
+                                                                      width_pixels => 1,
+                                                                      last_arrowhead => 1,
+                                                                      arrow_shape_a => 3.57,
+                                                                      arrow_shape_b => 6.93,
+                                                                      arrow_shape_c => 4,
+                                                                      fill_color => 'blue',
+                                                                      );
+              }
+              else
+              {
+                $line{$wps[$j-1]}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
+                                                                      points => [$prevx,$prevy-$diffy/5,$x,$y+$diffy/5],
+                                                                      width_pixels => 1,
+                                                                      last_arrowhead => 1,
+                                                                      arrow_shape_a => 3.57,
+                                                                      arrow_shape_b => 6.93,
+                                                                      arrow_shape_c => 4,
+                                                                      fill_color => 'blue',
+                                                                      line_style => 'on-off-dash'
+                                                                      );
+              }
             }
             $prevx = $x;
             $prevy = $y;
           }
           $diffx=0;
         }
-        @wps= split /\sis-a\s/,$wps2_path;
+        $x=$lcs_x;
+        $y=$lcs_y;
+        $prevx=$lcs_x;
+        $prevy=$lcs_y;
+        @wps= split /\shypernym\s/,$wps2_path;
         foreach $i (reverse 0...$#wps)
         {
           $word = $wps[$i];
@@ -685,10 +808,23 @@ sub display_tree
             {
               $maxx = $x;
             }
+            @colorpos = split '#', $word;
+            if($colorpos[1]=~ 'v')
+            {
+              $color = 'red';
+            }
+            elsif($colorpos[1]=~ 'n')
+            {
+              $color = 'dark green';
+            }
+            else
+            {
+              $color = 'purple';
+            }
             $text{$word} = Gnome2::Canvas::Item->new($shortest_path_group_wps2[$k], "Gnome2::Canvas::Text",
                                                       x => $x,
                                                       y => $y,
-                                                      fill_color => 'black',
+                                                      fill_color => $color,
                                                       font => 'Sans 10',
                                                       anchor => 'GTK_ANCHOR_CENTER',
                                                       text => $word);
@@ -722,9 +858,12 @@ sub display_tree
             next;
           }
         }
-
+        $x=$lcs_x;
+        $y=$lcs_y;
+        $prevx=$lcs_x;
+        $prevy=$lcs_y;
         $diffx=0;
-        @wps= split /\sis-a\s/,$wps1_path;
+        @wps= split /\shypernym\s/,$wps1_path;
         foreach $i (reverse 0...$#wps)
         {
           $word = $wps[$i];
@@ -748,10 +887,23 @@ sub display_tree
             {
               $maxx = $x;
             }
+            @colorpos = split '#', $word;
+            if($colorpos[1]=~ 'v')
+            {
+              $color = 'red';
+            }
+            elsif($colorpos[1]=~ 'n')
+            {
+              $color = 'dark green';
+            }
+            else
+            {
+              $color = 'purple';
+            }
             $text{$word} = Gnome2::Canvas::Item->new($shortest_path_group_wps1[$k], "Gnome2::Canvas::Text",
                                                 x => $x,
                                                 y => $y,
-                                                fill_color => 'black',
+                                                fill_color => $color,
                                                 font => 'Sans 10',
                                                 anchor => 'GTK_ANCHOR_CENTER',
                                                 text => $word);
@@ -803,49 +955,44 @@ sub display_tree
         $k++;
       }
     }
+    $self->{ canvas } = $canvas[0];
   }
   elsif($trace_strings[0]=~/wup/)
   {
     my @temp = split /\s=\s/, $trace_strings[$#trace_strings-2];
     my $word1 = $temp[0];
+    my $word_lcs_flag;
+    @temp = split /\s=\s/, $trace_strings[$#trace_strings];
+    my $lcs = $temp[0];
     @temp = split /\s=\s/, $trace_strings[$#trace_strings-1];
     my $word2 = $temp[0];
     my $sub;
-    my @trees = grep /\sis-a\s/, @trace_strings;
+    my @trees = grep /\shypernym\s/, @trace_strings;
     my @syns1;
     my @syns2;
     my $syn;
     my @mult_wps1_path;
     @syns1 = $self->{ querydata_interface }->find_allsyns($word1);
+    my $syns_group = join " ",@syns1;
     foreach $syn (@syns1)
     {
-      push @mult_wps1_path, grep(/$syn/, @trees);
+      push @mult_wps1_path, grep(/\b$syn\b/, @trees);
     }
     my @mult_wps2_path;
     @syns2 = $self->{ querydata_interface }->find_allsyns($word2);
     foreach $syn (@syns2)
     {
-      push @mult_wps2_path, grep(/$syn/, @trees);
-    }
-    if($#mult_wps1_path == $#trees)
-    {
-      @mult_wps1_path = ();
-      foreach $syn (@syns1)
-      {
-        push @mult_wps1_path, grep(!/$syn/, @trees);
-      }
-    }
-    if($#mult_wps2_path == $#trees)
-    {
-      @mult_wps2_path = ();
-      foreach $syn (@syns2)
-      {
-        push @mult_wps2_path, grep(!/$syn/, @trees);
-      }
+      push @mult_wps2_path, grep(/\b$syn\b/, @trees);
     }
     if($#mult_wps1_path+$#mult_wps2_path+1>1)
     {
       $notebook = Gtk2::Notebook->new;
+#       $notebook->signal_connect(switch_page=>sub {
+#                                                     my ($self,$gui) = @_;
+#                                                     my $child=$self->get_current_page;
+#                                                     my @children = $self->get_children;
+#                                                     $gui->{ canvas }= $children[$child];
+#                                },$self);
       $mpflag = 1;
     }
     else
@@ -853,9 +1000,10 @@ sub display_tree
       $notebook = Gtk2::VBox->new;
     }
     my $lcsflag=0;
-    foreach $wps1_path (@mult_wps1_path)
+    $syn = join " ",@syns1;
+    if($syn =~ /\b$word2\b/)
     {
-      foreach $wps2_path (@mult_wps2_path)
+      foreach $wps1_path (@mult_wps1_path)
       {
         $lcsflag=0;
         $x=0;
@@ -875,17 +1023,10 @@ sub display_tree
         $diffy = 40;
         $diffx = 0;
         $jflag=0;
-        @wps= split /\sis-a\s/, $wps1_path;
+        @wps= split /\shypernym\s/, $wps1_path;
         foreach $j (0...$#wps)
         {
           $word = $wps[$j];
-          if($wps2_path=~/$word/)
-          {
-            if($lcsflag==0)
-            {
-              $x=$x-length($word)*9;
-            }
-          }
           $y = $y-$diffy;
           if($miny>$y)
           {
@@ -905,10 +1046,24 @@ sub display_tree
           }
           $wpspos{$word}{"x"}=$x;
           $wpspos{$word}{"y"}=$y;
+          @colorpos = split '#', $word;
+          if($colorpos[1]=~ 'v')
+          {
+            $color = 'red';
+          }
+          elsif($colorpos[1]=~ 'n')
+          {
+            $color = 'dark green';
+          }
+          else
+          {
+            $color = 'purple';
+          }
+
           $text{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Text",
                                             x => $x,
                                             y => $y,
-                                            fill_color => 'black',
+                                            fill_color => $color,
                                             font => 'Sans 10',
                                             anchor => 'GTK_ANCHOR_CENTER',
                                             text => $word);
@@ -922,14 +1077,6 @@ sub display_tree
           if($j>0)
           {
             $sub=0;
-            if($wps2_path=~/$word/)
-            {
-              if($lcsflag==0)
-              {
-                $sub=length($word)*3;
-                $lcsflag=1;
-              }
-            }
             $line{$wps[$j-1]}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
                                                                   points => [$prevx,$prevy-$diffy/5,$x+$sub,$y+$diffy/5],
                                                                   width_pixels => 1,
@@ -937,77 +1084,11 @@ sub display_tree
                                                                   arrow_shape_a => 3.57,
                                                                   arrow_shape_b => 6.93,
                                                                   arrow_shape_c => 4,
-                                                                  fill_color => 'blue',
-                                                                  line_style => 'on-off-dash'
+                                                                  fill_color => 'blue'
                                                                   );
           }
           $prevx = $x;
           $prevy = $y;
-        }
-        $diffx=0;
-        @wps= split /\sis-a\s/,$wps2_path;
-        foreach $i (reverse 0...$#wps)
-        {
-          $word = $wps[$i];
-          if(!exists $text{$word})
-          {
-            $x = $x+$diffx;
-            $y = $y+$diffy;
-            if($miny>$y)
-            {
-              $miny = $y;
-            }
-            if($maxy<$y)
-            {
-              $maxy = $y;
-            }
-            if($minx>$x)
-            {
-              $minx = $x;
-            }
-            if($maxx<$x)
-            {
-              $maxx = $x;
-            }
-            $text{$word} = Gnome2::Canvas::Item->new($shortest_path_group_wps2[$k], "Gnome2::Canvas::Text",
-                                                      x => $x,
-                                                      y => $y,
-                                                      fill_color => 'black',
-                                                      font => 'Sans 10',
-                                                      anchor => 'GTK_ANCHOR_CENTER',
-                                                      text => $word);
-            if($word !~ /Root/)
-            {
-              $text{$word}->signal_connect (event => sub {
-                                                          my ($self,$event,$gui) = @_;
-                                                          $gui->display_tooltip($self,$event);
-                                                          },$self);
-            }
-            $wpspos{$word}{"x"}=$x;
-            $wpspos{$word}{"y"}=$y;
-            $line{$word}{$wps[$i+1]} = Gnome2::Canvas::Item->new($shortest_path_group_wps2[$k], "Gnome2::Canvas::Line",
-                                                points => [$prevx,$prevy+$diffy/5,$x,$y-$diffy/5],
-                                                width_pixels => 1,
-                                                first_arrowhead => 1,
-                                                arrow_shape_a => 3.57,
-                                                arrow_shape_b => 6.93,
-                                                arrow_shape_c => 4,
-                                                fill_color => 'blue'
-                                                );
-            $prevx = $x;
-            $prevy = $y;
-          }
-          else
-          {
-            my ($x1,$y1,$x2,$y2)=$text{$word}->get_bounds;
-            $x = $x1 - 5;
-            $y = $y2;
-            $prevx = $x;
-            $prevy = $y;
-            $x = $x-60;
-            $y = $y+10;
-            next;
-          }
         }
         $hx = abs($maxx-$minx)+100;
         $hy = abs($maxy-$miny)+80;
@@ -1027,6 +1108,228 @@ sub display_tree
         $k++;
       }
     }
+    else
+    {
+      foreach $wps1_path (@mult_wps1_path)
+      {
+        foreach $wps2_path (@mult_wps2_path)
+        {
+          if($wps1_path !~ /wps2_path/ and length($wps1_path)>1 and length($wps2_path)>1)
+          {
+            $lcsflag=0;
+            $x=0;
+            $y=0;
+            $maxx=0;
+            $maxy=0;
+            $minx=0;
+            $miny=0;
+            $canvas[$k] = Gnome2::Canvas->new;
+            $canvas_root[$k] = $canvas[$k]->root;
+            $shortest_path_group[$k] = Gnome2::Canvas::Item->new($canvas_root[$k], "Gnome2::Canvas::Group");
+            $root_group[$k] = Gnome2::Canvas::Item->new($shortest_path_group[$k], "Gnome2::Canvas::Group");
+            $shortest_path_group_wps1[$k] = Gnome2::Canvas::Item->new($shortest_path_group[$k], "Gnome2::Canvas::Group");
+            $shortest_path_group_wps2[$k] = Gnome2::Canvas::Item->new($shortest_path_group[$k], "Gnome2::Canvas::Group");
+            %text=();
+            %line=();
+            $diffy = 40;
+            $diffx = 0;
+            $jflag=0;
+            @wps= split /\shypernym\s/, $wps1_path;
+            foreach $j (0...$#wps)
+            {
+              $word = $wps[$j];
+              if($wps2_path=~/$word/)
+              {
+                if($lcsflag==0)
+                {
+                  $lcs = $word;
+                  $x=$x-length($word)*9;
+                  $lcs_x=$x;
+                  $lcs_y=$y-$diffy;
+                }
+              }
+              $y = $y-$diffy;
+              if($miny>$y)
+              {
+                $miny = $y;
+              }
+              if($maxy<$y)
+              {
+                $maxy = $y;
+              }
+              if($minx>$x)
+              {
+                $minx = $x;
+              }
+              if($maxx<$x)
+              {
+                $maxx = $x;
+              }
+              $wpspos{$word}{"x"}=$x;
+              $wpspos{$word}{"y"}=$y;
+              @colorpos = split '#', $word;
+              if($colorpos[1]=~ 'v')
+              {
+                $color = 'red';
+              }
+              elsif($colorpos[1]=~ 'n')
+              {
+                $color = 'dark green';
+              }
+              else
+              {
+                $color = 'purple';
+              }
+
+              $text{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Text",
+                                                x => $x,
+                                                y => $y,
+                                                fill_color => $color,
+                                                font => 'Sans 10',
+                                                anchor => 'GTK_ANCHOR_CENTER',
+                                                text => $word);
+              if($word !~ /Root/)
+              {
+                $text{$word}->signal_connect (event => sub {
+                                                            my ($self,$event,$gui) = @_;
+                                                            $gui->display_tooltip($self,$event);
+                                                            },$self);
+              }
+              if($j>0)
+              {
+                $sub=0;
+                if($wps2_path=~/$word/)
+                {
+                  if($lcsflag==0)
+                  {
+                    $sub=length($word)*3;
+                    $lcsflag=1;
+                  }
+                }
+                $line{$wps[$j-1]}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
+                                                                      points => [$prevx,$prevy-$diffy/5,$x+$sub,$y+$diffy/5],
+                                                                      width_pixels => 1,
+                                                                      last_arrowhead => 1,
+                                                                      arrow_shape_a => 3.57,
+                                                                      arrow_shape_b => 6.93,
+                                                                      arrow_shape_c => 4,
+                                                                      fill_color => 'blue'
+                                                                      );
+              }
+              $prevx = $x;
+              $prevy = $y;
+            }
+            $diffx=0;
+            @wps= split /\shypernym\s/,$wps2_path;
+            $word_lcs_flag=0;
+            $x=$lcs_x;
+            $y=$lcs_y;
+            $prevx = $x-length($lcs)*3;
+            $prevy = $y;
+            foreach $i (reverse 0...$#wps)
+            {
+              $word = $wps[$i];
+              if($word_lcs_flag==1)
+              {
+                if(!exists $text{$word})
+                {
+                  $x = $x+$diffx;
+                  $y = $y+$diffy;
+                  if($miny>$y)
+                  {
+                    $miny = $y;
+                  }
+                  if($maxy<$y)
+                  {
+                    $maxy = $y;
+                  }
+                  if($minx>$x)
+                  {
+                    $minx = $x;
+                  }
+                  if($maxx<$x)
+                  {
+                    $maxx = $x;
+                  }
+                  @colorpos = split '#', $word;
+                  if($colorpos[1]=~ 'v')
+                  {
+                    $color = 'red';
+                  }
+                  elsif($colorpos[1]=~ 'n')
+                  {
+                    $color = 'dark green';
+                  }
+                  else
+                  {
+                    $color = 'purple';
+                  }
+                  $text{$word} = Gnome2::Canvas::Item->new($shortest_path_group_wps2[$k], "Gnome2::Canvas::Text",
+                                                            x => $x,
+                                                            y => $y,
+                                                            fill_color => $color,
+                                                            font => 'Sans 10',
+                                                            anchor => 'GTK_ANCHOR_CENTER',
+                                                            text => $word);
+                  if($word !~ /Root/)
+                  {
+                    $text{$word}->signal_connect (event => sub {
+                                                                my ($self,$event,$gui) = @_;
+                                                                $gui->display_tooltip($self,$event);
+                                                                },$self);            }
+                  $wpspos{$word}{"x"}=$x;
+                  $wpspos{$word}{"y"}=$y;
+                  $line{$word}{$wps[$i+1]} = Gnome2::Canvas::Item->new($shortest_path_group_wps2[$k], "Gnome2::Canvas::Line",
+                                                      points => [$prevx,$prevy+$diffy/5,$x,$y-$diffy/5],
+                                                      width_pixels => 1,
+                                                      first_arrowhead => 1,
+                                                      arrow_shape_a => 3.57,
+                                                      arrow_shape_b => 6.93,
+                                                      arrow_shape_c => 4,
+                                                      fill_color => 'blue'
+                                                      );
+                  $prevx = $x;
+                  $prevy = $y;
+                }
+                else
+                {
+                  my ($x1,$y1,$x2,$y2)=$text{$word}->get_bounds;
+                  $x = $x1 - 5;
+                  $y = $y2;
+                  $prevx = $x;
+                  $prevy = $y;
+                  $x = $x-60;
+                  $y = $y+10;
+                  next;
+                }
+              }
+              elsif($lcs =~ /$word/)
+              {
+                $x = $x-length($lcs)*6;
+                $word_lcs_flag=1;
+              }
+            }
+            $hx = abs($maxx-$minx)+100;
+            $hy = abs($maxy-$miny)+80;
+            $canvas[$k]->set_size_request($hx,$hy);
+            $canvas[$k]->set_scroll_region (0, 0, $hx, $hy);
+            $shortest_path_group[$k]->set(x=>abs($minx)+60);
+            $shortest_path_group[$k]->set(y=>abs($miny)+10);
+            $minx = $k+1;
+            if($mpflag)
+            {
+              $notebook->append_page($canvas[$k], "Path ".$minx);
+            }
+            else
+            {
+              $notebook->add($canvas[0]);
+            }
+            $k++;
+          }
+        }
+      }
+    }
+     $self->{ canvas } = $canvas[0];
   }
   elsif($trace_strings[0]=~/lch/)
   {
@@ -1034,6 +1337,12 @@ sub display_tree
     if($#trace_strings>3)
     {
       $notebook = Gtk2::Notebook->new;
+#       $notebook->signal_connect(switch_page=>sub {
+#                                                     my ($self,$gui) = @_;
+#                                                     my $child=$self->get_current_page;
+#                                                     my @children = $self->get_children;
+#                                                     $gui->{ canvas }= $children[$child];
+#                                },$self);
       $mpflag = 1;
     }
     else
@@ -1066,7 +1375,7 @@ sub display_tree
         $diffx = 0;
         $lcsflag=0;
         $jflag=0;
-        @wps= split /\sis-a\s/, $trace_strings[$i];
+        @wps= split /\shypernym\s/, $trace_strings[$i];
         $diffx=0;
         foreach $j (0...$#wps)
         {
@@ -1097,10 +1406,23 @@ sub display_tree
           }
           $wpspos{$word}{"x"}=$x;
           $wpspos{$word}{"y"}=$y;
+          @colorpos = split '#', $word;
+          if($colorpos[1]=~ 'v')
+          {
+            $color = 'red';
+          }
+          elsif($colorpos[1]=~ 'n')
+          {
+            $color = 'dark green';
+          }
+          else
+          {
+            $color = 'purple';
+          }
           $text{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Text",
                                             x => $x,
                                             y => $y,
-                                            fill_color => 'black',
+                                            fill_color => $color,
                                             font => 'Sans 10',
                                             anchor => 'GTK_ANCHOR_CENTER',
                                             text => $word);
@@ -1129,8 +1451,7 @@ sub display_tree
                                                                   arrow_shape_a => 3.57,
                                                                   arrow_shape_b => 6.93,
                                                                   arrow_shape_c => 4,
-                                                                  fill_color => 'blue',
-                                                                  line_style => 'on-off-dash'
+                                                                  fill_color => 'blue'
                                                                   );
           }
           $prevx = $x;
@@ -1140,7 +1461,7 @@ sub display_tree
       else
       {
         $diffx=0;
-        @wps= split /\sis-a\s/,$trace_strings[$i];
+        @wps= split /\shypernym\s/,$trace_strings[$i];
         foreach $i (reverse 0...$#wps)
         {
           $word = $wps[$i];
@@ -1164,10 +1485,23 @@ sub display_tree
             {
               $maxx = $x;
             }
+            @colorpos = split '#', $word;
+            if($colorpos[1]=~ 'v')
+            {
+              $color = 'red';
+            }
+            elsif($colorpos[1]=~ 'n')
+            {
+              $color = 'dark green';
+            }
+            else
+            {
+              $color = 'purple';
+            }
             $text{$word} = Gnome2::Canvas::Item->new($shortest_path_group_wps2[$k], "Gnome2::Canvas::Text",
                                                       x => $x,
                                                       y => $y,
-                                                      fill_color => 'black',
+                                                      fill_color => $color,
                                                       font => 'Sans 10',
                                                       anchor => 'GTK_ANCHOR_CENTER',
                                                       text => $word);
@@ -1221,6 +1555,181 @@ sub display_tree
         }
       }
     }
+    $self->{ canvas } = $canvas[0];
+  }
+  elsif($trace_strings[0]=~/hso/)
+  {
+    $k=-1;
+    if($#trace_strings>1)
+    {
+      $notebook = Gtk2::Notebook->new;
+#       $notebook->signal_connect(switch_page=>sub {
+#                                                     my ($self,$gui) = @_;
+#                                                     my $child=$self->get_current_page;
+#                                                     my @children = $self->get_children;
+#                                                     $gui->{ canvas }= $children[$child];
+#                                },$self);
+      $mpflag = 1;
+    }
+    else
+    {
+      $notebook = Gtk2::VBox->new;
+    }
+    $i=0;
+    my $sub=0;
+    my $lcsflag=0;
+    my $prevword;
+    foreach $i (1...$#trace_strings)
+    {
+      $k++;
+      $x=0;
+      $y=0;
+      $maxx=0;
+      $maxy=0;
+      $minx=0;
+      $miny=0;
+      $canvas[$k] = Gnome2::Canvas->new;
+      $canvas_root[$k] = $canvas[$k]->root;
+      $shortest_path_group[$k] = Gnome2::Canvas::Item->new($canvas_root[$k], "Gnome2::Canvas::Group");
+      $root_group[$k] = Gnome2::Canvas::Item->new($shortest_path_group[$k], "Gnome2::Canvas::Group");
+      $shortest_path_group_wps1[$k] = Gnome2::Canvas::Item->new($shortest_path_group[$k], "Gnome2::Canvas::Group");
+      $shortest_path_group_wps2[$k] = Gnome2::Canvas::Item->new($shortest_path_group[$k], "Gnome2::Canvas::Group");
+      %text=();
+      %line=();
+      $diffy = 60;
+      $diffx = 0;
+      $lcsflag=0;
+      $jflag=0;
+      @wps= split /\s/, $trace_strings[$i];
+      $diffx=60;
+      $prevword="";
+      foreach $word (@wps)
+      {
+        if(length($word)>=1)
+        {
+          if($miny>$y)
+          {
+            $miny = $y;
+          }
+          if($maxy<$y)
+          {
+            $maxy = $y;
+          }
+          if($minx>$x)
+          {
+            $minx = $x;
+          }
+          if($maxx<$x)
+          {
+            $maxx = $x;
+          }
+          if($word=~/hypernym/)
+          {
+            $y=$y+$diffy;
+            $x=$x+$diffx+5;
+            if($prevx!=0)
+            {
+              $prevx+=5;
+            }
+            $prevy=$prevy+15;
+            $line{$prevword}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
+                                                        points => [$prevx,$prevy-$diffy/7,$x+$sub,$y-$diffy/7],
+                                                        width_pixels => 1,
+                                                        last_arrowhead => 1,
+                                                        arrow_shape_a => 3.57,
+                                                        arrow_shape_b => 6.93,
+                                                        arrow_shape_c => 4,
+                                                        fill_color => 'blue'
+                                                        );
+          }
+          elsif($word=~/hyponym/)
+          {
+            $x=$x+$diffx;
+            $y=$y-$diffy;
+            if($prevx!=0)
+            {
+              $prevx+=5;
+            }
+            $line{$prevword}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
+                                                                  points => [$prevx,$prevy-$diffy/7,$x+$sub,$y+$diffy/7],
+                                                                  width_pixels => 1,
+                                                                  last_arrowhead => 1,
+                                                                  arrow_shape_a => 3.57,
+                                                                  arrow_shape_b => 6.93,
+                                                                  arrow_shape_c => 4,
+                                                                  fill_color => 'green'
+                                                                  );
+          }
+          elsif($word=~/merynym/)
+          {
+            $prevx = $prevx + length($prevword)*3.5;
+            $x = $x+2*$diffx;
+            $line{$prevword}{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Line",
+                                                                  points => [$prevx+5,$prevy,$x-5,$y],
+                                                                  width_pixels => 1,
+                                                                  last_arrowhead => 1,
+                                                                  arrow_shape_a => 3.57,
+                                                                  arrow_shape_b => 6.93,
+                                                                  arrow_shape_c => 4,
+                                                                  fill_color => 'black'
+                                                                  );
+          }
+          else
+          {
+            if($prevword=~/merynym/)
+            {
+              $x=$x+length($word)*3.5;
+            }
+            @colorpos = split '#', $word;
+            if($colorpos[1]=~ 'v')
+            {
+              $color = 'red';
+            }
+            elsif($colorpos[1]=~ 'n')
+            {
+              $color = 'dark green';
+            }
+            else
+            {
+              $color = 'purple';
+            }
+            $text{$word} = Gnome2::Canvas::Item->new($root_group[$k], "Gnome2::Canvas::Text",
+                                              x => $x,
+                                              y => $y,
+                                              fill_color => $color,
+                                              font => 'Sans 10',
+                                              anchor => 'GTK_ANCHOR_CENTER',
+                                              text => $word);
+            if($word !~ /Root/)
+            {
+              $text{$word}->signal_connect (event => sub {
+                                                          my ($self,$event,$gui) = @_;
+                                                          $gui->display_tooltip($self,$event);
+                                                          },$self);
+            }
+            $prevx = $x;
+            $prevy = $y;
+          }
+          $prevword = $word;
+        }
+      }
+      $hx = abs($maxx-$minx)+100;
+      $hy = abs($maxy-$miny)+80;
+      $canvas[$k]->set_size_request($hx,$hy);
+      $canvas[$k]->set_scroll_region (0, 0, $hx, $hy);
+      $shortest_path_group[$k]->set(x=>abs($minx)+60);
+      $shortest_path_group[$k]->set(y=>abs($miny)+10);
+      $minx = $k+1;
+      if($mpflag)
+      {
+        $notebook->append_page($canvas[$k], "Path ".$minx);
+      }
+      else
+      {
+        $notebook->add($canvas[0]);
+      }
+    }
+    $self->{ canvas } = $canvas[0];
   }
   return $notebook;
 }
@@ -1304,6 +1813,18 @@ sub display_tooltip
   }
 }
 
+# sub save_file
+# {
+#   my ($self,$filename)=@_;
+# #   my $window = Gtk2::Gdk::Drawable->new;
+# #   $window = $self->{ canvas }->get_window();
+#   my $pixbuf = Gtk2::Gdk::Pixbuf->new('rgb',0,8,1000,1000);
+#   $pixbuf->get_from_drawable(undef,$self->{ canvas }->get_colormap(),0,0,0,0,1000,1000);
+# #   my $pixbuf = Gtk2::Gdk::pixbuf->new_from_data($window,$window->get_colormap(),0,0,0,0,1000,1000);
+#   pixbuf->save($filename,"png");
+# }
+
+
 1;
 __END__
 
@@ -1350,11 +1871,11 @@ hypernym trees also use the same system as used in the shortest path. The next
 line is the maximum depth of the hypertree
 
     path
-    cat#n#1 is-a feline#n#1 is-a carnivore#n#1
-    dog#n#1 is-a canine#n#2 is-a carnivore#n#1
-    carnivore#n#1 is-a placental#n#1 is-a mammal#n#1 is-a vertebrate#n#1 is-a
-      chordate#n#1 is-a animal#n#1 is-a organism#n#1 is-a living_thing#n#1 is-a
-      object#n#1 is-a entity#n#1 is-a Root#n#1
+    cat#n#1 hypernym feline#n#1 hypernym carnivore#n#1
+    dog#n#1 hypernym canine#n#2 hypernym carnivore#n#1
+    carnivore#n#1 hypernym placental#n#1 hypernym mammal#n#1 hypernym vertebrate#n#1 hypernym
+      chordate#n#1 hypernym animal#n#1 hypernym organism#n#1 hypernym living_thing#n#1 hypernym
+      object#n#1 hypernym entity#n#1 hypernym Root#n#1
     Max Depth = 13
     Path length = 5
 
@@ -1380,7 +1901,7 @@ tpederse@d.umn.edu
 
 Copyright (c) 2005-2006, Saiyam Kohli and Ted Pedersen
 
-This program is free software; you can redistribute it and/or modify it
+This program is free software; you can purpleistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
 Software Foundation; either version 2 of the License, or (at your option)
 any later version.

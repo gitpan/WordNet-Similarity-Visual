@@ -34,7 +34,7 @@ The following methods are defined in this package:
 use 5.008004;
 use strict;
 use warnings;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use Gtk2 '-init';
 use Gnome2;
 use WordNet::QueryData;
@@ -315,32 +315,33 @@ sub convert_to_meta
     my @syns1;
     my @syns2;
     my $syn;
+    my $all_lcs="";
     my @word1tree;
     @syns1 = $self->{ wn }->querySense($word1,"syns");
     foreach $syn (@syns1)
     {
-      push @word1tree, grep(/$syn/, @hypertrees);
+      push @word1tree, grep(/\b$syn\b/, @hypertrees);
     }
     my @word2tree;
     @syns2 = $self->{ wn }->querySense($word2,"syns");
     foreach $syn (@syns2)
     {
-      push @word2tree, grep(/$syn/, @hypertrees);
-    }
-    if($#word1tree == $#hypertrees)
-    {
-      @word1tree = ();
-      foreach $syn (@syns1)
-      {
-        push @word1tree, grep(!/$syn/, @hypertrees);
-      }
+      push @word2tree, grep(/\b$syn\b/, @hypertrees);
     }
     if($#word2tree == $#hypertrees)
     {
       @word2tree = ();
+      foreach $syn (@syns1)
+      {
+        push @word2tree, grep(!/\b$syn\b/, @hypertrees);
+      }
+    }
+    if($#word1tree == $#hypertrees)
+    {
+      @word1tree = ();
       foreach $syn (@syns2)
       {
-        push @word2tree, grep(!/$syn/, @hypertrees);
+        push @word1tree, grep(!/\b$syn\b/, @hypertrees);
       }
     }
     @pathlengths = ();
@@ -355,10 +356,43 @@ sub convert_to_meta
           if($w2tree=~/$synset/)
           {
             $lcs_path{$path}{$synset}=1;
+            if(length($all_lcs) > 0)
+            {
+              $all_lcs = $synset." ".$all_lcs;
+            }
+            else
+            {
+              $all_lcs = $synset
+            }
             last PATH;
           }
         }
       }
+    }
+    my %lcs_root_paths = ();
+    my $lcs_root;
+    foreach $path (@hypertrees)
+    {
+      $lcs_root='';
+      @synsets=split " ", $path;
+      foreach $synset (@synsets)
+      {
+        if(length($lcs_root)!=0 )
+        {
+          $lcs_root=$synset." hypernym ".$lcs_root;
+        }
+        else
+        {
+          $lcs_root = $synset;
+        }
+        if($all_lcs=~/$synset/)
+        {
+          last;
+        }
+      }
+      $lcs_root_paths{$lcs_root}++;
+      $allpaths{$lcs_root}=1;
+      $alt_paths{$lcs_root}=1;
     }
     my %w2_paths=();
     my $w2_path;
@@ -370,7 +404,7 @@ sub convert_to_meta
       {
         if(length($w2_path)!=0 )
         {
-          $w2_path=$w2_path." is-a ".$synset;
+          $w2_path=$w2_path." hypernym ".$synset;
         }
         else
         {
@@ -393,7 +427,7 @@ sub convert_to_meta
       {
         if(length($w1_path)!=0 )
         {
-          $w1_path=$w1_path." is-a ".$synset;
+          $w1_path=$w1_path." hypernym ".$synset;
         }
         else
         {
@@ -401,56 +435,57 @@ sub convert_to_meta
         }
         if(exists $lcs_path{$path}{$synset})
         {
+          $all_lcs = $synset;
           last;
         }
       }
       $w1_paths{$w1_path}++;
     }
-    my $flag=1;
-    my $flag2=0;
-    foreach $wtree (@hypertrees)
-    {
-      @synsets = split " ", $wtree;
-      foreach $i (reverse 0...$#synsets)
-      {
-        $flag=1;
-        foreach $path (keys %allpaths)
-        {
-          if($path=~/\b$synsets[$i]\b/)
-          {
-            $flag=0;
-            last;
-          }
-        }
-        if ($flag==1)
-        {
-          if($flag2==1)
-          {
-            $alt_path=$alt_path." is-a ".$synsets[$i];
-          }
-          else
-          {
-            $flag2=1;
-            $alt_path = $synsets[$i+1]." is-a ".$synsets[$i];
-          }
-        }
-        elsif($flag2==1)
-        {
-          $flag2=0;
-          $alt_path=$alt_path." is-a ".$synsets[$i];
-          $alt_paths{$alt_path}=1;
-          $allpaths{$alt_path}=1;
-          $alt_path='';
-        }
-      }
-      if($flag2==1)
-      {
-        $flag2=0;
-        $alt_paths{$alt_path}=1;
-        $allpaths{$alt_path}=1;
-        $alt_path='';
-      }
-    }
+#     my $flag=1;
+#     my $flag2=0;
+#     foreach $wtree (@hypertrees)
+#     {
+#       @synsets = split " ", $wtree;
+#       foreach $i (reverse 0...$#synsets)
+#       {
+#         $flag=1;
+#         foreach $path (keys %allpaths)
+#         {
+#           if($path=~/\b$synsets[$i]\b/)
+#           {
+#             $flag=0;
+#             last;
+#           }
+#         }
+#         if ($flag==1)
+#         {
+#           if($flag2==1)
+#           {
+#             $alt_path=$alt_path." hypernym ".$synsets[$i];
+#           }
+#           else
+#           {
+#             $flag2=1;
+#             $alt_path = $synsets[$i+1]." hypernym ".$synsets[$i];
+#           }
+#         }
+#         elsif($flag2==1)
+#         {
+#           $flag2=0;
+#           $alt_path=$alt_path." hypernym ".$synsets[$i];
+#           $alt_paths{$alt_path}=1;
+#           $allpaths{$alt_path}=1;
+#           $alt_path='';
+#         }
+#       }
+#       if($flag2==1)
+#       {
+#         $flag2=0;
+#         $alt_paths{$alt_path}=1;
+#         $allpaths{$alt_path}=1;
+#         $alt_path='';
+#       }
+#     }
     my $key;
     $trace_return=$measure."\n";
     my $j=0;
@@ -483,7 +518,10 @@ sub convert_to_meta
     $trace_return=$trace_return."\n";
     foreach $key (keys %alt_paths)
     {
-      $trace_return=$trace_return.$key."\n";
+      if($key =~ /$all_lcs/)
+      {
+        $trace_return=$trace_return.$key."\n";
+      }
     }
     $trace_return=$trace_return."Max Depth = ".$maxdepth."\n";
     $trace_return=$trace_return.$pathlength."\n";
@@ -491,8 +529,21 @@ sub convert_to_meta
   elsif($measure=~/wup/)
   {
     my @depth = grep /Depth/, @trace;
-    my @word1_depth = grep /$word1/, @depth;
-    my @word2_depth = grep /$word2/, @depth;
+    my @word1_depth;
+    my $syn;
+    my @syns1;
+    my @syns2;
+    @syns1 = $self->{ wn }->querySense($word1,"syns");
+    foreach $syn (@syns1)
+    {
+      push @word1_depth, grep /$syn/, @depth;
+    }
+    my @word2_depth;
+    @syns2 = $self->{ wn }->querySense($word2,"syns");
+    foreach $syn (@syns2)
+    {
+      push @word2_depth, grep /$syn/, @depth;
+    }
     my @lcs_depth = grep /Lowest\sCommon\sSubsumers/, @depth;
     my @hypertrees = grep /HyperTree/, @trace;
     foreach $i (0...$#hypertrees)
@@ -515,7 +566,7 @@ sub convert_to_meta
       {
         if(length($tree)!=0 )
         {
-          $tree=$tree." is-a ".$synset;
+          $tree=$tree." hypernym ".$synset;
         }
         else
         {
@@ -526,13 +577,45 @@ sub convert_to_meta
     }
     my $lcs = $lcs_depth[0];
     my $key;
+    my $temptree = join " ", @hypertrees;
     $lcs =~ s/Lowest\sCommon\sSubsumers:\s//;
     $lcs =~ s/\*Root\*/Root/;
     $lcs =~ s/\s\(Depth=\d\)//;
-    my @temp = split /=/,$word1_depth[0];
-    my $depth_word1 = $word1." = ".$temp[1];
-    @temp = split /=/,$word2_depth[0];
-    my $depth_word2 = $word2." = ".$temp[1];
+    my $depth_word1;
+    my $depth_word2;
+    my @temp;
+    if($#word1_depth>0)
+    {
+      @temp = split /=/,$word1_depth[0];
+      $depth_word1 = $word1." = ".$temp[1];
+    }
+    else
+    {
+      foreach $syn (@syns1)
+      {
+        if($temptree =~ /$syn/)
+        {
+          $depth_word1=$syn;
+          last;
+        }
+      }
+    }
+    if($#word2_depth>0)
+    {
+      @temp = split /=/,$word2_depth[0];
+      $depth_word2 = $word2." = ".$temp[1];
+    }
+    else
+    {
+      foreach $syn (@syns2)
+      {
+        if($temptree=~/$syn/)
+        {
+          $depth_word2=$syn;
+          last;
+        }
+      }
+    }
     @temp = split /=/,$lcs_depth[0];
     $temp[1] =~ s/\)//;
     $lcs = $lcs." = ".$temp[1];
@@ -574,20 +657,20 @@ sub convert_to_meta
     @syns1 = $self->{ wn }->querySense($word1,"syns");
     foreach $syn (@syns1)
     {
-      push @word1tree, grep(/$syn/, @hypertrees);
+      push @word1tree, grep(/\b$syn\b/, @hypertrees);
     }
     my @word2tree;
     @syns2 = $self->{ wn }->querySense($word2,"syns");
     foreach $syn (@syns2)
     {
-      push @word2tree, grep(/$syn/, @hypertrees);
+      push @word2tree, grep(/\b$syn\b/, @hypertrees);
     }
     if($#word1tree == $#hypertrees)
     {
       @word1tree = ();
       foreach $syn (@syns1)
       {
-        push @word1tree, grep(!/$syn/, @hypertrees);
+        push @word1tree, grep(!/\b$syn\b/, @hypertrees);
       }
     }
     if($#word2tree == $#hypertrees)
@@ -595,12 +678,13 @@ sub convert_to_meta
       @word2tree = ();
       foreach $syn (@syns2)
       {
-        push @word2tree, grep(!/$syn/, @hypertrees);
+        push @word2tree, grep(!/\b$syn\b/, @hypertrees);
       }
     }
     my %w1_paths=();
     my $w1_path;
     my $j=0;
+    my $all_lcs="";
     foreach $path (@word1tree)
     {
       $w1_path='';
@@ -611,7 +695,7 @@ sub convert_to_meta
         $j++;
         if(length($w1_path)!=0 )
         {
-          $w1_path=$w1_path." is-a ".$synset;
+          $w1_path=$w1_path." hypernym ".$synset;
         }
         else
         {
@@ -619,10 +703,18 @@ sub convert_to_meta
         }
         if(exists $lcs{$synset})
         {
+          $all_lcs=$synset;
           last;
         }
       }
-      $w1_paths{$w1_path}=$j;
+      if (length($all_lcs)>0)
+      {
+        $w1_paths{$all_lcs}{$w1_path}=$j;
+      }
+      else
+      {
+        $w1_paths{"Root#n#1"}{$w1_path}=$j;
+      }
     }
     my %w2_paths=();
     my $w2_path;
@@ -637,7 +729,7 @@ sub convert_to_meta
         $j++;
         if(length($w2_path)!=0 )
         {
-          $w2_path=$w2_path." is-a ".$synset;
+          $w2_path=$w2_path." hypernym ".$synset;
         }
         else
         {
@@ -645,30 +737,89 @@ sub convert_to_meta
         }
         if(exists $lcs{$synset})
         {
+          $all_lcs=$synset;
           last;
         }
       }
-      $w2_paths{$w2_path}=$j;
-    }
-    my $length = 100;
-    foreach $w1_path (keys %w1_paths)
-    {
-      foreach $w2_path (keys %w2_paths)
+      if (length($all_lcs)>0)
       {
-        if($length > $w1_paths{$w1_path}+$w2_paths{$w2_path})
+        $w2_paths{$all_lcs}{$w2_path}=$j;
+      }
+      else
+      {
+        $w2_paths{"Root#n#1"}{$w2_path}=$j;
+      }
+    }
+    my $lcs_synset;
+    my $length = 100;
+    foreach $lcs_synset (keys %w1_paths)
+    {
+      foreach $w1_path (keys %{$w1_paths{$lcs_synset}})
+      {
+        foreach $w2_path (keys %{$w2_paths{$lcs_synset}})
         {
-          $path = $w1_path."\n".$w2_path;
-          $length = $w1_paths{$w1_path}+$w2_paths{$w2_path};
-        }
-        elsif($length == $w1_paths{$w1_path}+$w2_paths{$w2_path})
-        {
-          $path = $path."\n".$w1_path."\n".$w2_path;
+          if($length > $w1_paths{$lcs_synset}{$w1_path}+$w2_paths{$lcs_synset}{$w2_path})
+          {
+            $path = $w1_path."\n".$w2_path;
+            $length = $w1_paths{$lcs_synset}{$w1_path}+$w2_paths{$lcs_synset}{$w2_path};
+          }
+          elsif($length == $w1_paths{$lcs_synset}{$w1_path}+$w2_paths{$lcs_synset}{$w2_path})
+          {
+            $path = $path."\n".$w1_path."\n".$w2_path;
+          }
         }
       }
     }
+
+#     my $length = 100;
+#     foreach $w1_path (keys %w1_paths)
+#     {
+#       foreach $w2_path (keys %w2_paths)
+#       {
+#         if($length > $w1_paths{$w1_path}+$w2_paths{$w2_path})
+#         {
+#           $path = $w1_path."\n".$w2_path;
+#           $length = $w1_paths{$w1_path}+$w2_paths{$w2_path};
+#         }
+#         elsif($length == $w1_paths{$w1_path}+$w2_paths{$w2_path})
+#         {
+#           $path = $path."\n".$w1_path."\n".$w2_path;
+#         }
+#       }
+#     }
     $trace_return = $measure."\n";
     $length--;
     $trace_return = $trace_return.$path."\n".$length;
+    return $trace_return;
+  }
+  elsif ($measure =~ /hso/)
+  {
+    my $trace_return = "hso";
+    if( $tracestring =~ /MedStrong\srelation\spath\.\.\./)
+    {
+      $tracestring =~ s/\n//g;
+      @trace = split /MedStrong\srelation\spath\.\.\./, $tracestring;
+      my @path;
+      foreach $i(1...$#trace)
+      {
+        chomp $trace[$i];
+        $path[$i-1] = $trace[$i];
+        $path[$i-1] =~ s/\[U\]/hyponym/g;
+        $path[$i-1] =~ s/\[D\]/hypernym/g;
+        $path[$i-1] =~ s/\[H\]/merynym/g;
+        $trace_return = $trace_return."\n".$path[$i-1];
+      }
+    }
+    elsif($tracestring=~/Strong\sRel\s\(Synset\sMatch\)/)
+    {
+      $tracestring =~ s/\n//g;
+      @trace = split /Strong\sRel\s\(Synset\sMatch\)\s:\s/, $tracestring;
+      $trace_return = $trace_return."\n".$trace[1];
+    }
+    else
+    {
+        $trace_return = $trace_return."\n-1";
+    }
     return $trace_return;
   }
 }
@@ -699,11 +850,11 @@ hypernym trees also use the same system as used in the shortest path. The next
 line is the maximum depth of the hypertree
 
     path
-    cat#n#1 is-a feline#n#1 is-a carnivore#n#1
-    dog#n#1 is-a canine#n#2 is-a carnivore#n#1
-    carnivore#n#1 is-a placental#n#1 is-a mammal#n#1 is-a vertebrate#n#1 is-a
-      chordate#n#1 is-a animal#n#1 is-a organism#n#1 is-a living_thing#n#1 is-a
-      object#n#1 is-a entity#n#1 is-a Root#n#1
+    cat#n#1 hypernym feline#n#1 hypernym carnivore#n#1
+    dog#n#1 hypernym canine#n#2 hypernym carnivore#n#1
+    carnivore#n#1 hypernym placental#n#1 hypernym mammal#n#1 hypernym vertebrate#n#1 hypernym
+      chordate#n#1 hypernym animal#n#1 hypernym organism#n#1 hypernym living_thing#n#1 hypernym
+      object#n#1 hypernym entity#n#1 hypernym Root#n#1
     Max Depth = 13
     Path length = 5
 

@@ -34,7 +34,7 @@ The following methods are defined in this package:
 use 5.008004;
 use strict;
 use warnings;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use Gtk2 '-init';
 use constant TRUE  => 1;
 use constant FALSE => 0;
