@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                WordNet-Similarity-Visual
-version:             0.07
+version:             0.08
 abstract:            Perl extension for providing visualization tools
 license:             gpl
 author:              

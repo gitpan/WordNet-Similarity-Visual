@@ -1,11 +1,13 @@
 Changes
-Makefile.PL
-MANIFEST
-README
 INSTALL
-t/WordNet-Similarity-Visual.t
 lib/WordNet/Similarity/Visual.pm
 lib/WordNet/Similarity/Visual/GUI_Window.pm
-lib/WordNet/Similarity/Visual/SimilarityInterface.pm
 lib/WordNet/Similarity/Visual/QueryDataInterface.pm
+lib/WordNet/Similarity/Visual/SimilarityInterface.pm
+Makefile.PL
+MANIFEST			This list of files
+README
+t/WordNet-Similarity-Visual.t
+TODO
+wordnet_similarity.pl
 META.yml                                 Module meta-data (added by MakeMaker)

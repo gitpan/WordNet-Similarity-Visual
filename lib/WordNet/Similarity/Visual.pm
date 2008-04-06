@@ -57,7 +57,7 @@ my $tooltip_label;
 my $vpaned;
 my $main_statusbar;
 my $canvas;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =item  $obj->new
 
@@ -1879,27 +1879,24 @@ line is the maximum depth of the hypertree
     Max Depth = 13
     Path length = 5
 
-
 =head1 SEE ALSO
 
-WordNet::Similarity
-WordNet::QueryData
+L<WordNet::Similarity>
+L<WordNet::QueryData>
 
 Mailing List: E<lt>wn-similarity@yahoogroups.comE<gt>
 
-
 =head1 AUTHOR
 
-Saiyam Kohli, University of Minnesota, Duluth
-kohli003@d.umn.edu
+ Saiyam Kohli, University of Minnesota, Duluth
+ kohli003@d.umn.edu
 
-Ted Pedersen, University of Minnesota, Duluth
-tpederse@d.umn.edu
-
+ Ted Pedersen, University of Minnesota, Duluth
+ tpederse at d.umn.edu
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005-2006, Saiyam Kohli and Ted Pedersen
+Copyright (c) 2005-2008, Saiyam Kohli and Ted Pedersen
 
 This program is free software; you can purpleistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
