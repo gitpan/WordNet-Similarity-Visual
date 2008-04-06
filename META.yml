@@ -1,0 +1,18 @@
+--- #YAML:1.0
+name:                WordNet-Similarity-Visual
+version:             0.07
+abstract:            Perl extension for providing visualization tools
+license:             gpl
+author:              
+    - Saiyam Kohli <saiyamkohli at gmail.com>
+generated_by:        ExtUtils::MakeMaker version 6.44
+distribution_type:   module
+requires:     
+    Gnome2:                        1.0
+    Gtk2:                          1.0
+    Text::Similarity:              0.02
+    WordNet::QueryData:            1.30
+    WordNet::Similarity:           0.14
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3
